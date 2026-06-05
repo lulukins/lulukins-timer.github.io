@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>14-Hour Interval Timer</title>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #2ecc71;
+            transition: background-color 0.5s ease;
+        }
+
+        #timer {
+            font-size: 10rem;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+
+        #controls {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button {
+            padding: 10px 30px;
+            font-size: 1.2rem;
+            background-color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #ddd;
+        }
+
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            font-size: 1rem;
+            border: 2px solid white;
+            border-radius: 5px;
+            width: 120px;
+        }
+
+        label {
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="timer">05:00</div>
+
+    <div id="controls">
+        <button id="startStopBtn">Start</button>
+        
+        <div class="color-input">
+            <label for="color1">Color 1:</label>
+            <input type="text" id="color1" placeholder="#2ecc71">
+        </div>
+        
+        <div class="color-input">
+            <label for="color2">Color 2:</label>
+            <input type="text" id="color2" placeholder="#e74c3c">
+        </div>
+        
+        <button id="applyColorsBtn">Apply Colors</button>
+    </div>
+
+    <script>
+        const TIMER_LENGTH = 5 * 60;     // 5 minutes
+        const TOTAL_RUNTIME = 14 * 60 * 60; // 14 hours
+
+        let colors = [
+            "#2ecc71", // green
+            "#e74c3c"  // red
+        ];
+
+        let colorIndex = 0;
+        let remaining = TIMER_LENGTH;
+        let elapsed = 0;
+        let timerInterval = null;
+        let isRunning = false;
+
+        const timerEl = document.getElementById("timer");
+        const startStopBtn = document.getElementById("startStopBtn");
+        const applyColorsBtn = document.getElementById("applyColorsBtn");
+        const color1Input = document.getElementById("color1");
+        const color2Input = document.getElementById("color2");
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+
+            return (
+                String(mins).padStart(2, "0") +
+                ":" +
+                String(secs).padStart(2, "0")
+            );
+        }
+
+        function updateDisplay() {
+            timerEl.textContent = formatTime(remaining);
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            startStopBtn.textContent = "Stop";
+
+            timerInterval = setInterval(() => {
+
+                remaining--;
+                elapsed++;
+
+                if (elapsed >= TOTAL_RUNTIME) {
+                    clearInterval(timerInterval);
+                    timerEl.textContent = "DONE";
+                    isRunning = false;
+                    startStopBtn.textContent = "Start";
+                    return;
+                }
+
+                if (remaining < 0) {
+                    remaining = TIMER_LENGTH;
+
+                    colorIndex = (colorIndex + 1) % colors.length;
+                    document.body.style.backgroundColor = colors[colorIndex];
+                }
+
+                updateDisplay();
+
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (!isRunning) return;
+            
+            isRunning = false;
+            clearInterval(timerInterval);
+            startStopBtn.textContent = "Start";
+        }
+
+        startStopBtn.addEventListener("click", () => {
+            if (isRunning) {
+                stopTimer();
+            } else {
+                startTimer();
+            }
+        });
+
+        applyColorsBtn.addEventListener("click", () => {
+            const c1 = color1Input.value.trim() || colors[0];
+            const c2 = color2Input.value.trim() || colors[1];
+            
+            colors = [c1, c2];
+            colorIndex = 0;
+            document.body.style.backgroundColor = colors[0];
+            
+            color1Input.value = c1;
+            color2Input.value = c2;
+        });
+
+        updateDisplay();
+    </script>
+
+</body>
+</html>
